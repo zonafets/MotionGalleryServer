@@ -1,23 +1,30 @@
-import BaseHTTPServer
+'''
+A simple authenticated web server handler
+'''
+
 from SimpleHTTPServer import SimpleHTTPRequestHandler
-import sys
 import os
 import base64
 import ssl
 import SocketServer
+import argparse
 
-key = ""
-CERTFILE_PATH = "/root/server.pem"
+CERT_FILE = "cert.pem"
+KEY_FILE = "key.pem"
 
-class AuthHandler(SimpleHTTPRequestHandler):
+class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
     ''' Main class to present webpages and authentication. '''
+    KEY = ''
+
     def do_HEAD(self):
+        ''' head method '''
         print "send header"
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-    def do_AUTHHEAD(self):
+    def do_authhead(self):
+        ''' do authentication '''
         print "send header"
         self.send_response(401)
         self.send_header('WWW-Authenticate', 'Basic realm=\"Test\"')
@@ -25,42 +32,44 @@ class AuthHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        global key
         ''' Present frontpage with user authentication. '''
-        if self.headers.getheader('Authorization') == None:
-            self.do_AUTHHEAD()
+        if self.headers.getheader('Authorization') is None:
+            self.do_authhead()
             self.wfile.write('no auth header received')
-            pass
-        elif self.headers.getheader('Authorization') == 'Basic '+key:
+        elif self.headers.getheader('Authorization') == 'Basic '+ self.KEY:
             SimpleHTTPRequestHandler.do_GET(self)
-            pass
         else:
-            self.do_AUTHHEAD()
+            self.do_authhead()
             self.wfile.write(self.headers.getheader('Authorization'))
             self.wfile.write('not authenticated')
-            pass
 
-def serve_https(https_port=80, HandlerClass = AuthHandler,
-         ServerClass = BaseHTTPServer.HTTPServer):
-    httpd = SocketServer.TCPServer(("", PORT), HandlerClass)
-    httpd.socket = ssl.wrap_socket (httpd.socket, certfile=CERTFILE_PATH, server_side=True)
-
-    sa = httpd.socket.getsockname()
-    print "Serving HTTP on", sa[0], "port", sa[1], "..."
+def serve_https(https_port=80, cert=True, handler_class=SimpleHTTPAuthHandler):
+    ''' setting up server '''
+    httpd = SocketServer.TCPServer(("", https_port), handler_class)
+    if cert:
+        httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=KEY_FILE,
+                                       certfile=CERT_FILE, server_side=True)
+    socket_addr = httpd.socket.getsockname()
+    print "Serving HTTP on", socket_addr[0], "port", socket_addr[1], "..."
     httpd.serve_forever()
 
+def main():
+    ''' Parsing inputs '''
+    parser = argparse.ArgumentParser()
+    parser.add_argument('port', type=int, help='port number')
+    parser.add_argument('key', help='username:password')
+    parser.add_argument('--dir', required=False, help='directory')
+    parser.add_argument('--cert', help='Use the provided cert', action='store_true', default=False)
+    args = parser.parse_args()
+
+    SimpleHTTPAuthHandler.KEY = base64.b64encode(args.key)
+
+    if args.dir:
+        print "Changing dir to {cd}".format(cd=args.dir)
+        os.chdir(args.dir)
+
+    serve_https(int(args.port), cert=args.cert, handler_class=SimpleHTTPAuthHandler)
+
+
 if __name__ == '__main__':
-    if len(sys.argv)<3:
-        print "usage SimpleAuthServer.py [port] [username:password]"
-        sys.exit()
-
-    https_port = int(sys.argv[1])
-    key = base64.b64encode(sys.argv[2])
-
-    if len(sys.argv) == 4:
-        change_dir = sys.argv[3]
-        print "Changing dir to {cd}".format(cd=change_dir)
-        os.chdir(change_dir)
-
-    serve_https(https_port)
-
+    main()
