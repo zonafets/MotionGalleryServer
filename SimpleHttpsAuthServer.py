@@ -54,13 +54,13 @@ if __name__ == '__main__':
         print "usage SimpleAuthServer.py [port] [username:password]"
         sys.exit()
 
-	https_port = int(sys.argv[1])
-	key = base64.b64encode(sys.argv[2])
+    https_port = int(sys.argv[1])
+    key = base64.b64encode(sys.argv[2])
 
-	if len(sys.argv) == 4:
-		change_dir = sys.argv[3]
-		print "Changing dir to {cd}".format(cd=change_dir)
-		os.chdir(change_dir)
+    if len(sys.argv) == 4:
+        change_dir = sys.argv[3]
+        print "Changing dir to {cd}".format(cd=change_dir)
+        os.chdir(change_dir)
 
     serve_https(https_port)
 
