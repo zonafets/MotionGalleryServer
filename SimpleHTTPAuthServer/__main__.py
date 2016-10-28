@@ -9,6 +9,8 @@ import ssl
 import SocketServer
 import argparse
 
+from . import __prog__
+
 CERT_FILE = "cert.pem"
 KEY_FILE = "key.pem"
 
@@ -55,7 +57,7 @@ def serve_https(https_port=80, cert=True, handler_class=SimpleHTTPAuthHandler):
 
 def main():
     ''' Parsing inputs '''
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog=__prog__)
     parser.add_argument('port', type=int, help='port number')
     parser.add_argument('key', help='username:password')
     parser.add_argument('--dir', required=False, help='directory')
