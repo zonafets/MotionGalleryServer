@@ -48,10 +48,10 @@ class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
 def serve_https(https_port=80, cert=True, start_dir=None, handler_class=SimpleHTTPAuthHandler):
     ''' setting up server '''
     httpd = SocketServer.TCPServer(("", https_port), handler_class)
+
     if cert:
         httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=KEY_FILE,
                                        certfile=CERT_FILE, server_side=True)
-
 
     if start_dir:
         print "Changing dir to {cd}".format(cd=start_dir)
