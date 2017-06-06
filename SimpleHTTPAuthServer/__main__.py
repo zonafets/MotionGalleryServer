@@ -12,9 +12,9 @@ import argparse
 
 from . import __prog__
 
-CERT_FILE = os.path.expanduser("~/cert.pem")
-KEY_FILE = os.path.expanduser("~/key.pem")
-SSL_CMD = "openssl req -newkey rsa:2048 -new -nodes -keyout key.pem -out cert.pem"
+CERT_FILE = os.path.expanduser("~/.ssh/cert.pem")
+KEY_FILE = os.path.expanduser("~/.ssh/key.pem")
+SSL_CMD = "openssl req -newkey rsa:2048 -new -nodes -keyout {0} -out {1}".format(CERT_FILE, KEY_FILE)
 
 class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
     ''' Main class to present webpages and authentication. '''
@@ -73,7 +73,7 @@ def main():
     args = parser.parse_args()
 
     if args.cert:
-        if not os.path.exists(CERT_FILE) or os.path.exists(KEY_FILE):
+        if not (os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE)):
             print >>sys.stderr, "Missing {} or {}".format(CERT_FILE, KEY_FILE)
             print >>sys.stderr, "Run `{}`".format(SSL_CMD)
             print >>sys.stderr
