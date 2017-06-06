@@ -4,6 +4,7 @@ A simple authenticated web server handler
 
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 import os
+import sys
 import base64
 import ssl
 import SocketServer
@@ -11,8 +12,9 @@ import argparse
 
 from . import __prog__
 
-CERT_FILE = "cert.pem"
-KEY_FILE = "key.pem"
+CERT_FILE = os.path.expanduser("~/cert.pem")
+KEY_FILE = os.path.expanduser("~/key.pem")
+SSL_CMD = "openssl req -newkey rsa:2048 -new -nodes -keyout key.pem -out cert.pem"
 
 class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
     ''' Main class to present webpages and authentication. '''
@@ -67,8 +69,15 @@ def main():
     parser.add_argument('port', type=int, help='port number')
     parser.add_argument('key', help='username:password')
     parser.add_argument('--dir', required=False, help='directory')
-    parser.add_argument('--cert', help='Use the provided cert', action='store_true', default=False)
+    parser.add_argument('--cert', help='Use the cert', action='store_true', default=False)
     args = parser.parse_args()
+
+    if args.cert:
+        if not os.path.exists(CERT_FILE) or os.path.exists(KEY_FILE):
+            print >>sys.stderr, "Missing {} or {}".format(CERT_FILE, KEY_FILE)
+            print >>sys.stderr, "Run `{}`".format(SSL_CMD)
+            print >>sys.stderr
+            sys.exit(1)
 
     SimpleHTTPAuthHandler.KEY = base64.b64encode(args.key)
 
