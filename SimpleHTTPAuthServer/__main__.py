@@ -45,12 +45,18 @@ class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
             self.wfile.write(self.headers.getheader('Authorization'))
             self.wfile.write('not authenticated')
 
-def serve_https(https_port=80, cert=True, handler_class=SimpleHTTPAuthHandler):
+def serve_https(https_port=80, cert=True, start_dir=None, handler_class=SimpleHTTPAuthHandler):
     ''' setting up server '''
     httpd = SocketServer.TCPServer(("", https_port), handler_class)
     if cert:
         httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=KEY_FILE,
                                        certfile=CERT_FILE, server_side=True)
+
+
+    if start_dir:
+        print "Changing dir to {cd}".format(cd=start_dir)
+        os.chdir(start_dir)
+
     socket_addr = httpd.socket.getsockname()
     print "Serving HTTP on", socket_addr[0], "port", socket_addr[1], "..."
     httpd.serve_forever()
@@ -66,11 +72,8 @@ def main():
 
     SimpleHTTPAuthHandler.KEY = base64.b64encode(args.key)
 
-    if args.dir:
-        print "Changing dir to {cd}".format(cd=args.dir)
-        os.chdir(args.dir)
-
-    serve_https(int(args.port), cert=args.cert, handler_class=SimpleHTTPAuthHandler)
+    serve_https(int(args.port), cert=args.cert,
+                start_dir=args.dir, handler_class=SimpleHTTPAuthHandler)
 
 
 if __name__ == '__main__':
