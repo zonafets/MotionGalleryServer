@@ -14,7 +14,7 @@ from . import __prog__
 
 CERT_FILE = os.path.expanduser("~/.ssh/cert.pem")
 KEY_FILE = os.path.expanduser("~/.ssh/key.pem")
-SSL_CMD = "openssl req -newkey rsa:2048 -new -nodes -keyout {0} -out {1}".format(CERT_FILE, KEY_FILE)
+SSL_CMD = "openssl req -newkey rsa:2048 -new -nodes -keyout {0} -out {1}".format(KEY_FILE, CERT_FILE)
 
 class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
     ''' Main class to present webpages and authentication. '''
