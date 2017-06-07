@@ -1,5 +1,5 @@
 pylint:
-	pylint --errors-only SimpleHTTPAuthServer
+	pylint SimpleHTTPAuthServer
 
 server: cert.pem
 	python -m SimpleHTTPAuthServer 9009 user:pass
