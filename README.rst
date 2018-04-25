@@ -25,7 +25,13 @@ A simple server for serving directories via http or https and BASIC authorizatio
 Installation
 ------------
 
+::
+
     pip install sauth
+
+Also available on Arch User Repository if you're running arch::
+    
+    pacaur -S sauth
 
 Usage
 -----
