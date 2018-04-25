@@ -4,7 +4,7 @@ A simple authenticated web server handler
 license="GNU General Public License v3"
 """
 
-__version__ = 1.0
+__version__ = 1.01
 __prog__ = 'sauth'
 
 from http.server import SimpleHTTPRequestHandler

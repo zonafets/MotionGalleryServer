@@ -3,11 +3,16 @@
 from sauth import __version__, __prog__
 from setuptools import setup
 
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
+
+
 setup(
     name=__prog__,
     version=__version__,
     license="GNU General Public License v3",
-    description='Simple Auth Server SSL',
+    description="A simple server app for serving directories via http or https and BASIC authorization",
+    long_description=readme,
     author='Bernardas Ališauskas',
     author_email='tinarg@protonmail.com',
     url='https://github.com/granitosaurus/sauth/',
