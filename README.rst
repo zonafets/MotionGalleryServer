@@ -7,6 +7,7 @@ sauth
         :target: https://pypi.python.org/pypi/sauth
 
 **S** erver **auth**
+
 A simple server for serving directories via http or https and BASIC authorization::
 
     $ sauth --help
