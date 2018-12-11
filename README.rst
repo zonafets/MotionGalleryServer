@@ -1,47 +1,52 @@
-=====
-sauth
-=====
+# Motion Gallery Server
 
+A simple web server for serving Motion snapshots:
 
-.. image:: https://img.shields.io/pypi/v/sauth.svg
-        :target: https://pypi.python.org/pypi/sauth
+![A day gallery](imgs/motion_day_gallery.gif
 
-**S** erver **auth**
+### What's Motion
+Motion is a light weight surveillance server that can be found [here](https://motion-project.github.io/).
+ 
+### Motion installation
 
-A simple server for serving directories via http or https and BASIC authorization::
+First of all you have to follow a tutorial for basic installation and configuration.
 
-    $ sauth --help
-    Usage: sauth [OPTIONS] USERNAME PASSWORD [IP] [PORT]
+I'm using a RaspberryPI that need only a classic:
 
-      Start http server with basic authentication current directory.
+	sudo apt install motion
+	
+### Motion configuration
 
-    Options:
-      --https     use https
-      --dir TEXT  use different directory
-      --help      Show this message and exit.
+I use a webcam that take a snapshot when a motion is detected.
 
-* Free software: GNU General Public License v3
+The most important configuration parameters are:
 
-Installation
-------------
+	target_dir /home/pi/motion
 
-::
+	picture_filename %Y%m%d/%H%M%S-%q
+	
+that sets the base directory and **create a sub directory for every day** where put the snapshots.
 
-    pip install sauth
+In [doc/motion-4.0.conf](doc/motion-4.0.conf) there are more parameters.
 
-Also available on Arch User Repository if you're running arch::
-    
-    pacaur -S sauth
+### Install Motion Gallery Server
 
-Usage
------
+- install base python modules
+```bash
+(sudo -H) pip3 install simple-http-server
+(sudo -H) pip3 install click
+```
+	 
+- create a directory for your server or use /var/motion
+- download Motion Gallery Server
+- give permissions to user motion with chown/chgrp	
 
-To serve your current directory simply run::
+### Configure Motion Gallery Server
+You need three steps:
 
-    $ sauth someuser somepass
-    Serving "/home/user/somedir" directory on http://0.0.0.0:8333
-
-You can specify port and ip to serve on with 3rd and 4th arguments::
-
-    $ sauth someuser somepass 127.0.0.1 1234
-    Serving "/home/user/somedir" directory on http://127.0.0.1:1234
+1. create the bash script that run the python server from the directory of shapshots
+can find an example in [doc/MotionGalleryServer.sh](doc/MotionGalleryServer.sh)
+2. create a crontab task that run the server on boot
+```bash
+@reboot	/home/pi/MotionGalleryServer.sh
+```
