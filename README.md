@@ -49,7 +49,7 @@ in my case I used **/home/pi/motion**
 You need three steps:
 
 1. create the bash script that run the python server from the directory of shapshots
-(an example in [doc/MotionGalleryServer.sh](doc/MotionGalleryServer.sh)
+(an example in [src/MotionGalleryServer.sh](src/MotionGalleryServer.sh)
 this uses a config file in /etc/ for username/password)
 2. create a crontab task that run the server on boot
 ```bash

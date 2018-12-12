@@ -1,13 +1,14 @@
 """
-Sauth:
-A simple authenticated web server handler
+MotionGalleryServer:
+A simple authenticated web server to serve Motion (surveillance) snapshots
 license="GNU General Public License v3"
 """
 
-__version__ = '1.0.2'
-__prog__ = 'sauth'
+__version__ = '1.0.0'
+__prog__ = 'MotionGalleryServer'
 
 from http.server import SimpleHTTPRequestHandler
+# import urlparse
 import os
 import sys
 import base64
@@ -23,7 +24,7 @@ SSL_CMD = "openssl req -newkey rsa:2048 -new -nodes -x509 " \
           "-days 3650 -keyout {0} -out {1}".format(KEY_FILE, CERT_FILE)
 
 
-class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
+class MotionGalleryServer(SimpleHTTPRequestHandler):
     """Main class to present webpages and authentication."""
     username = ''
     password = ''
@@ -68,6 +69,7 @@ class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
 
     def do_DELETE(self):
         if self.check_auth():
+            # pdb.set_trace()
             file = os.getcwd() + self.path
             os.remove(file)
             self.send_response(204)
@@ -75,7 +77,7 @@ class SimpleHTTPAuthHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
 
-def serve_http(ip="", port=80, https=True, start_dir=None, handler_class=SimpleHTTPAuthHandler):
+def serve_http(ip="", port=80, https=True, start_dir=None, handler_class=MotionGalleryServer):
     """setting up server"""
     socketserver.TCPServer.allow_reuse_address=True
     httpd = socketserver.TCPServer((ip, port), handler_class)
@@ -120,10 +122,10 @@ def main(dir, ip, port, username, password, https):
         print(file=sys.stderr)
         sys.exit(1)
 
-    SimpleHTTPAuthHandler.username = username
-    SimpleHTTPAuthHandler.password = password
+    MotionGalleryServer.username = username
+    MotionGalleryServer.password = password
     serve_http(ip=ip, port=port, https=https,
-               start_dir=dir, handler_class=SimpleHTTPAuthHandler)
+               start_dir=dir, handler_class=MotionGalleryServer)
 
 
 if __name__ == "__main__":
