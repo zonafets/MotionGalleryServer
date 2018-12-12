@@ -5,7 +5,7 @@ A simple web server for serving Motion snapshots:
 ![A day gallery](imgs/motion_day_gallery.gif)
 
 ### What's Motion
-Motion is a light weight surveillance server. It can be found [here](https://motion-project.github.io/).
+Motion is a light weight but complete surveillance server. It can be found [here](https://motion-project.github.io/).
  
 ### Motion installation
 
