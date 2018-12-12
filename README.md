@@ -40,9 +40,9 @@ In [doc/motion-4.0.conf](doc/motion-4.0.conf) cand find more detailed parameters
 - create a directory for your server or use **/var/motion**
 in my case I used **/home/pi/motion**
 - download Motion Gallery Server
-	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/MotionGalleryServer.py](https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/MotionGalleryServer.py)
+	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/src/MotionGalleryServer.py](https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/src/MotionGalleryServer.py)
 - download Motion Gallery web-app client
-	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/index.html](https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/index.html)
+	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/index.html](https://raw.githubusercontent.com/zonafets/src/MotionGalleryServer/master/src/index.html)
 - give it permissions for user motion with chown/chgrp	
 
 ### Configure Motion Gallery Server
