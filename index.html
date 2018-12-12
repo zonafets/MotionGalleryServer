@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Motion thumbnails viewer app</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+
+    <style>
+
+        navbar {
+            display: block;
+            padding: 4px;
+        }
+
+        navbar button {
+	       font-size: medium;
+            margin: 2px;
+        }
+
+        message {
+            color: red;
+        }
+
+        thumbnail {
+            position: relative;
+            display: inline-block;
+        }
+
+        .thumbnail-img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            width: 150px;
+        }
+
+        /* Add a hover effect (blue shadow) */
+        .thumbnail-img:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+        }
+
+        label {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            color: #FFFFFF;
+            background: #000;
+            font-weight: bold;
+        }
+
+        label.selected {
+            color: #000;
+            background: #f9db4a;
+        }
+
+        zoomed {
+            position: fixed;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+	        border-color: #716c2e;
+            padding: 5px;
+            display: none;
+            background: #fbef61;
+            z-index: 1000;
+    	    left: 50%;
+    	    top: 50%;
+    	    transform: translate(-50%, -50%);
+    	    width: fit-content;
+        }
+
+        zoomed img {
+            width: 100%;
+        }
+
+    </style>
+</head>
+
+<body onhashchange="load()">
+    <h1>Motion day gallery</h1>
+    <message></message>
+    <navbar>
+        <button onclick="changeDay(-1)">Prev day</button>
+        <button onclick="changeDay(+1)">Next day</button>
+        <button onclick="changeDay(0)">Today</button>
+        <button onclick="remove(true)">Remove selected</button>
+        <button onclick="remove(false)">Remove (UN)selected</button>
+        <button onclick="changeSize(+2)" title="increase thumbnail size"> + </button>
+        <button onclick="changeSize(-2)" title="decrease thumbnail size"> - </button>
+        <button onclick="thumbnailSwitchClickMode()" title="click to change between zoom & select" id="thumbnailClickMode"></button>
+    </navbar>
+    <zoomed onclick="hide(this)"><img/></zoomed>
+    <thumbnails></thumbnails>
+    <script>
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        var thumbnailClickModes = {
+            zoom:{
+                typeId:1,
+                label:"zoom mode"
+            },
+            select:{
+                typeId:2,
+                label:"select mode"
+            }
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function thumbnailSwitchClickMode() {
+
+            var thumbnailClickModeElement = $("#thumbnailClickMode")
+            var content = thumbnailClickModeElement.text()
+            if (content == thumbnailClickModes.select.label || content == "") {
+                thumbnailClickModeElement.text( thumbnailClickModes.zoom.label )
+            } else {
+                thumbnailClickModeElement.text( thumbnailClickModes.select.label )
+            }
+
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function getThumbnailClickMode() {
+            var thumbnailClickModeElement = $("#thumbnailClickMode")
+            var content = thumbnailClickModeElement.text()
+            if (content == thumbnailClickModes.select.label) return thumbnailClickModes.select.typeId
+            if (content == thumbnailClickModes.zoom.label) return thumbnailClickModes.zoom.typeId
+            throw "ThumbnailClickMode not initialized"
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        String.prototype.tpl = function (hash) {
+            // example
+            // var person = '{title} {first} {last}'.tpl({ title: 'Agent', first: 'Jack', last: 'Bauer' });
+            var string = this, key; 
+            for (key in hash) 
+                string = string.replace(new RegExp('\\{' + key + '\\}', 'gm'), hash[key]); 
+            return string
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function pad(n) {
+            return n<10 ? '0'+n : ''+n;
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function YYYYMMDD(dt) {
+            var y = dt.getFullYear()
+            var m = dt.getMonth()+1
+            var d = dt.getDate()
+            var sdt = pad(y)+pad(m)+pad(d)
+            return sdt
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function currentDate() {
+            var dayparts = window.location.hash.substr(1).match(/.{1,2}/g)
+            var dt = new Date(dayparts[0]+dayparts[1],dayparts[2]-1,dayparts[3],0,0,0,0)
+            return dt
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function addDays(dt,n) {
+            var dateOffset = (24*60*60*1000) * n
+            dt.setTime(dt.getTime()+dateOffset)
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function path(yyyymmdd) {
+            if (yyyymmdd === undefined) {
+                if (window.location.hash === "") return path(YYYYMMDD(new Date()))
+                return "/" + window.location.hash.substr(1) + "/"
+            } else {
+                window.location.hash = yyyymmdd
+            }
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function getThumbWidth() {
+            var img = document.createElement("DIV")
+            var width
+            img.classList.add("thumbnail-img")
+            img.style.display = "none"
+            document.body.appendChild(img);
+            width = parseInt(getComputedStyle(img).width,10)
+            document.body.removeChild(img);
+            return width
+        }
+
+        function setThumbWidth(width) {
+            var thumbnailsCSS = "thumbnail img"
+            $(thumbnailsCSS).css("width", width+"px");
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function changeSize(delta) {
+            var width = getThumbWidth()
+            if ((delta<0 && width>100) || (delta>0 && width<240)) width += delta
+            setThumbWidth(width)
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function hide(img) {
+            img.style.display="none";
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function zoom(img) {
+        	$("zoomed img")[0].src = img.src
+            $("zoomed")[0].style.display = "block"
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function toggleSelection(label) {
+            $(label).toggleClass("selected")
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function imageClicked(img) {
+            if (getThumbnailClickMode() === thumbnailClickModes.select.typeId) 
+                toggleSelection($(img).parent().children("label"))
+            if (getThumbnailClickMode() === thumbnailClickModes.zoom.typeId) 
+                zoom(img)
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function changeDay(delta) {
+            if (delta === 0)
+                path(YYYYMMDD(new Date()))
+            else {
+                var dt = currentDate()
+                addDays(dt,delta)
+                path(YYYYMMDD(dt))
+            }
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        /* remove selected or unselected thumbnails from view and from host */
+        function remove(selected) {
+            if (selected === undefined) throw("remove() cannot called without parameter")
+
+            var list
+            var idx = 0
+
+            function removeFiles() {
+                if (idx===list.length) return
+                var filename = list[idx].src
+                var thumbnail = list[idx].parentElement
+                $.ajax({
+                    url: filename,
+                    type: 'DELETE',
+                    success: function(result) {
+                        console.log(filename + " removed")
+                        idx++
+                        $(thumbnail).empty()
+                        removeFiles()
+                    },
+                    error: function(result){
+                        console.log(filename + " not deleted")
+                        idx++
+                        removeFiles()
+                    }
+                });
+            }
+
+            if (selected) list = $("thumbnail label.selected").parent().children("img")
+            else list = $("thumbnail label").not(".selected").parent().children("img")
+            if (list.length>0) removeFiles()
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function load() {
+            var dir = path()
+            var fileextension = ".jpg";
+            var thumbnails = $("thumbnails")
+            var thumbWidth = getThumbWidth()
+            thumbnails.empty()
+            $.ajax({
+                //This will retrieve the contents of the folder if the folder is configured as 'browsable'
+                url: dir,
+                success: function (data) {
+                    $(data).find("a:contains(" + fileextension + ")").each(function () {
+                        var filename = dir+this.href.replace(window.location.host, "").replace("http:///", "");
+                        var label = filename.substr(filename.lastIndexOf("/")+1,6).match(/.{1,2}/g).join(":")
+                        var htmlLabel = "<label onclick='{clickEvent}' title='{title}'>{label}</label>".tpl({
+                            clickEvent: "toggleSelection(this)",
+                            title: "click to select",
+                            label: label
+                        })
+                        var htmlImg = "<img class='thumbnail-img' src='{filename}' onclick='{clickEvent}' title='{title}'/>".tpl({
+                            filename: filename + "?" + thumbWidth,
+                            clickEvent: "imageClicked(this)",
+                            title: "click to zoom or select or click over time label"
+                        })
+                        var html = "<thumbnail>" + htmlImg + htmlLabel +"</thumbnail>"
+                        thumbnails.append($(html));
+                    });
+                },
+                error: function(result){$("thumbnails").text("no files")}
+            })
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        function init() {
+            thumbnailSwitchClickMode()
+            load()
+        }
+
+        /* ---------------------------------------------------------------------------------------------------------- */
+
+        init()
+
+    </script>
+</body>
+</html>
