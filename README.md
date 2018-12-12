@@ -11,7 +11,7 @@ Motion is a light weight but complete surveillance server. It can be found [here
 
 First of all you have to follow a tutorial for basic installation and configuration.
 
-I'm using a RaspberryPI that need only a classic:
+I'm using a RaspberryPI that need only:
 
 	sudo apt install motion
 	
@@ -27,7 +27,7 @@ The most important configuration parameters are:
 	
 that sets the base directory and **create a sub directory for every day** where put the snapshots.
 
-In [doc/motion-4.0.conf](doc/motion-4.0.conf) there are more parameters.
+In [doc/motion-4.0.conf](doc/motion-4.0.conf) cand find more detailed parameters.
 
 ### Install Motion Gallery Server
 
@@ -42,14 +42,15 @@ in my case I used **/home/pi/motion**
 - download Motion Gallery Server
 	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/MotionGalleryServer.py](https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/MotionGalleryServer.py)
 - download Motion Gallery web-app client
-	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/MotionGalleryServer.py](https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/index.html)
+	wget [https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/index.html](https://raw.githubusercontent.com/zonafets/MotionGalleryServer/master/index.html)
 - give it permissions for user motion with chown/chgrp	
 
 ### Configure Motion Gallery Server
 You need three steps:
 
 1. create the bash script that run the python server from the directory of shapshots
-(an example in [doc/MotionGalleryServer.sh](doc/MotionGalleryServer.sh))
+(an example in [doc/MotionGalleryServer.sh](doc/MotionGalleryServer.sh)
+this uses a config file in /etc/ for username/password)
 2. create a crontab task that run the server on boot
 ```bash
 @reboot	/home/pi/MotionGalleryServer.sh
