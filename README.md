@@ -59,6 +59,24 @@ I used this command to simplify and test:
 ```bash
 sudo runuser -l motion -s "/bin/bash"
 ```
+
+### Interface usage
+
+button/element|event|action
+----|-------|--------------
+URL hash|#YYYYMMDD|show snapshots of specific date
+prev.day|click|show previous day snapshots
+next.day|click|show next day snapshots
+today|click|go to today snapshots
++|click|increase size of thumbnails
+-|click|decrease size of thumbnails
+thumbnail|click|select/unselect
+thumbnail|dbl.click|open zoomed image
+zoomed thumbnail|click|close zoomed image
+remove selected|click|delete on server and client the selected thumbnails
+remove (UN)selected|click|delete on server and client the thumbnails not selected
+
+
 ### Todo
 1. manage the get of resized images for mobile/low band devices/networks
 2. limitis delete of JPG only to allow server & client programs to stay in the same folder
